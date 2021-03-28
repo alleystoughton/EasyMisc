@@ -5,7 +5,9 @@
  * -------------------------------------------------------------------- *)
 
 (* An axiom-free formalization of well-founded relations, induction
-   and recursion. *)
+   and recursion.
+
+   Makes no use of smt. *)
 
 require import AllCore StdOrder.
 import IntOrder.
@@ -114,18 +116,18 @@ lemma wf_lex (wfr1 : 'a rel, wfr2 : 'b rel) :
 proof.
 move => wf_wfr1 wf_wfr2.
 rewrite /wf_lex /wf => xs /is_nonempty [x xs_x].
-have [y1 [] /= [y [xs_y y1_eq]]]
+have [y1 [] /= [y [xs_y y1_eq]] not_y1_pred]
      := wf_wfr1 (fun y1 => exists p, xs p /\ p.`1 = y1) _.
   rewrite /is_nonempty /is_empty negb_forall /=.
   by exists x.`1; exists x.
-rewrite negb_exists /= => H1.
-have [z2 [] /= [z [xs_z [z1_eq z2_eq]]]]
+rewrite negb_exists /= in not_y1_pred.
+have [z2 [] /= [z [xs_z [z1_eq z2_eq]]] not_z2_pred]
      := wf_wfr2
         (fun z2 =>
          exists (p : 'a * 'b), xs p /\ p.`1 = y1 /\ p.`2 = z2) _.
   rewrite /is_nonempty /is_empty negb_forall /=.
   by exists y.`2; exists y.
-rewrite negb_exists /= => H2.
+rewrite negb_exists /= in not_z2_pred.
 exists z.
 rewrite xs_z /=.
 case (exists y0,
@@ -135,14 +137,14 @@ have contrad : (exists p', xs p' /\ p'.`1 = p.`1) /\ wfr1 p.`1 y1.
   split.
   exists p; by rewrite xs_p.
   by rewrite -z1_eq.
-have // := H1 p.`1.
+have // := not_y1_pred p.`1.
 have contrad :
-       (exists (p' : 'a * 'b), xs p' /\ p'.`1 = y1 /\ p'.`2 = p.`2) /\
-       wfr2 p.`2 z2.
+     (exists (p' : 'a * 'b), xs p' /\ p'.`1 = y1 /\ p'.`2 = p.`2) /\
+     wfr2 p.`2 z2.
   split.
   exists p; by rewrite xs_p eq_p1_z1 z1_eq.
   rewrite -z2_eq wfr2_p2_z2.
-have // := H2 p.`2.
+have // := not_z2_pred p.`2.
 qed.
 
 (* restrictions of well-founded relations *)
@@ -155,13 +157,12 @@ lemma wf_restr (wfr : 'a rel, rel : 'a rel) :
 proof.
 move => wf_wfr.
 rewrite /wf /wf_restr => xs ne_xs.
-have [x [xs_x not_ex]] := wf_wfr xs _.
+have [x [xs_x not_ex_x_pred]] := wf_wfr xs _.
   trivial.
 exists x.
 rewrite xs_x /=.
 case (exists y, xs y /\ wfr y x /\ rel y x) =>
-  [ | //].
-move => [y [#] xs_y wfr_y_x rel_y_x].
+  [[y [#] xs_y wfr_y_x rel_y_x] | //].
 have // : exists y, xs y /\ wfr y x.
 by exists y.
 qed.
@@ -177,7 +178,7 @@ proof.
 move => wf_wfr.
 rewrite /wf /wf_pre => xs.
 rewrite /is_nonempty /is_empty negb_forall => /= [[x xs_x]].
-have [y /= [[x' [xs_x' <-]] not_ex]]
+have [y /= [[x' [xs_x' <-]] not_ex_f_x'_pred]]
      := (wf_wfr (fun y => exists x, xs x /\ f x = y) _).
   rewrite /is_nonempty /is_empty negb_forall /=.
   by exists (f x); exists x.
@@ -186,9 +187,7 @@ rewrite xs_x' /=.
 case (exists x'', xs x'' /\ wfr (f x'') (f x')) =>
   [[x'' [xs_x'' wfr_f_x''_f_x']] | //].
 have // :
-  exists y',
-  (exists x'', xs x'' /\ f x'' = y') /\
-  wfr y' (f x').
+  exists y', (exists x'', xs x'' /\ f x'' = y') /\ wfr y' (f x').
   exists (f x'').
   rewrite wfr_f_x''_f_x' /=.
   by exists x''.
