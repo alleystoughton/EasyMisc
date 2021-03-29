@@ -373,7 +373,10 @@ qed.
 
 type ('a, 'b) grels = ('a, 'b) grel predi.  (* represents set of grels *)
 
-(* generalized intersection *)
+(* generalized intersection
+
+   the intersection of the empty grels is the universal relation,
+   which exists because we are working in a typed setting *)
 
 op grels_inter (grels : ('a, 'b) grels) : ('a, 'b) grel =
   fun (x : 'a, y : 'b) =>
@@ -398,7 +401,8 @@ type ('a, 'b) wf_rec_def = 'a -> ('a -> 'b) -> 'b.
    default element def, and a body wfrd of a recursive definition
 
    the default element is returned if wfrd calls (grel_to_fun def
-   grel') on an input not in grel's domain *)
+   grel') on an value not in the domain of grel', i.e., one that is
+   not a predecessor of x in wfr *)
 
 op wf_closed
    (wfr : 'a rel, def : 'b, wfrd : ('a, 'b) wf_rec_def,
@@ -594,6 +598,8 @@ have grel_x_choice_grel_x := choicebP (grel x) def _.
   by exists y.
 by apply (grel_is_fun_grel x).
 qed.
+
+(* the recursion lemma *)
 
 lemma wf_recur
       (wfr : 'a rel, def : 'b, wfrd : ('a, 'b) wf_rec_def, x : 'a) :
