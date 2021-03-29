@@ -16,6 +16,10 @@ import IntOrder.
 
 type 'a predi = 'a -> bool.
 
+(* if pr : 'a predi and x : 'a, then we read "pr x" as "x satisfies
+   pr"; we can think of predicates as representing sets - the elements
+   they map to true *)
+
 op is_empty (xs : 'a predi) : bool = forall (y : 'a), ! xs y.
 
 op is_nonempty (xs : 'a predi) : bool = ! is_empty xs.
@@ -36,6 +40,15 @@ proof.
 rewrite /sub => H1 H2 z xs_z.
 by rewrite H2 H1.
 qed.
+
+(* ----------------------------- relations ---------------------------- *)
+
+(* the type of relations is defined in prelude/Logic.ec as
+
+     type 'a rel = 'a -> 'a -> bool.
+
+   if rel : 'a rel and x, y : 'a, then we read "rel x y" as "the pair
+   (x, y) is in rel" *)
 
 (* ---------------------- well-founded relations ---------------------- *)
 
