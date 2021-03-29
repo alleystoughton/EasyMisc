@@ -401,7 +401,7 @@ type ('a, 'b) wf_rec_def = 'a -> ('a -> 'b) -> 'b.
    default element def, and a body wfrd of a recursive definition
 
    the default element is returned if wfrd calls (grel_to_fun def
-   grel') on an value not in the domain of grel', i.e., one that is
+   grel') on a value not in the domain of grel', i.e., one that is
    not a predecessor of x in wfr *)
 
 op wf_closed
