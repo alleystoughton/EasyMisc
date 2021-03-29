@@ -37,8 +37,8 @@ op sub (xs ys : 'a predi) : bool =
 lemma sub_trans (zs xs ys : 'a predi) :
   sub xs zs => sub zs ys => sub xs ys.
 proof.
-rewrite /sub => H1 H2 z xs_z.
-by rewrite H2 H1.
+rewrite /sub => sub_xs_zs sub_zs_ys z xs_z.
+by rewrite sub_zs_ys sub_xs_zs.
 qed.
 
 (* ----------------------------- relations ---------------------------- *)
@@ -227,8 +227,8 @@ op grel_sub (r1 r2 : ('a, 'b) grel) : bool =
 lemma grel_sub_trans (grel' grel1 grel2 : ('a, 'b) grel) :
   grel_sub grel1 grel' => grel_sub grel' grel2 => grel_sub grel1 grel2.
 proof.
-rewrite /grel_sub => H1 H2 x y grel1_x_y.
-by rewrite H2 H1.
+rewrite /grel_sub => sub_grel1_grel' sub_grel'_grel2 x y grel1_x_y.
+by rewrite sub_grel'_grel2 sub_grel1_grel'.
 qed.
 
 op grel_dom (grel : ('a, 'b) grel) : 'a predi =
