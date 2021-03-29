@@ -195,7 +195,7 @@ qed.
 
 (* ---------------------- well-founded recursion ---------------------- *)
 
-(* if you just want to use well-founded recursion, skip ahead to
+(* if you just want to *use* well-founded recursion, skip ahead to
    definitions of wf_rec_def and wf_recur *)
 
 (* generalized relations *)
@@ -317,22 +317,6 @@ qed.
 op grel_to_fun (def : 'b, grel : ('a, 'b) grel) : 'a -> 'b =
   fun (x : 'a) => choiceb (grel x) def.
 
-lemma grel_fun_to_fun (def : 'b, grel : ('a, 'b) grel) :
-  grel_is_fun grel =>
-  (forall (x : 'a),
-   grel_dom grel x =>
-   (forall (y : 'b),
-    grel x y <=> grel_to_fun def grel x = y)).
-proof.
-move => gif_grel x gd_grel_x y.
-rewrite /grel_to_fun.
-split => [grel_x_y | <-].
-have grel_x_choice := choicebP (grel x) def _.
-  trivial.
-by apply (gif_grel x).
-by apply (choicebP (grel x)).
-qed.
-
 op grel_choose_sub_fun (grel : ('a, 'b) grel) : ('a, 'b) grel =
   fun (x : 'a, y : 'b) =>
   grel_dom grel x /\ y = choiceb (grel x) witness.
@@ -374,7 +358,9 @@ by rewrite (grel_restr_is_fun (grel_choose_sub_fun grel))
 by rewrite grel_restr_dom 1:dom_eq_choose_grel_grel.
 qed.
 
-type ('a, 'b) grels = ('a, 'b) grel predi.
+type ('a, 'b) grels = ('a, 'b) grel predi.  (* represents set of grels *)
+
+(* generalized intersection *)
 
 op grels_inter (grels : ('a, 'b) grels) : ('a, 'b) grel =
   fun (x : 'a, y : 'b) =>
@@ -389,9 +375,17 @@ rewrite /grels_inter => all_x_y.
 by apply all_x_y.
 qed.
 
-(* body of well-founded recursion definition *)
+(* body of well-founded recursive definition: given an input (x : 'a)
+   and a function (f : 'a -> 'b) for doing recursive calls, produce an
+   answer of type 'b *)
 
 type ('a, 'b) wf_rec_def = 'a -> ('a -> 'b) -> 'b.
+
+(* when grel is closed with respect to a well-founded relation wfr, a
+   default element def, and a body wfrd of a recursive definition
+
+   the default element is returned if wfrd calls (grel_to_fun def
+   grel') on an input not in grel's domain *)
 
 op wf_closed
    (wfr : 'a rel, def : 'b, wfrd : ('a, 'b) wf_rec_def,
@@ -425,10 +419,14 @@ lemma wfc_inter
 proof.
 rewrite /wf_closed =>
   all_closed x grel' grel'_sub_inter is_fun_grel' dom_grel'_preds.
+rewrite /grels_inter in grel'_sub_inter.
 rewrite /grels_inter => grel grels_grel.
 rewrite all_closed // /grel_sub => x' y' grel'_x'_y'.
 by rewrite grel'_sub_inter.
 qed.
+
+(* this is our candidate for the recursively defined function, as a
+   grel: the intersection of the set of all closed grels *)
 
 op wfc_least
    (wfr : 'a rel, def : 'b, wfrd : ('a, 'b) wf_rec_def) : ('a, 'b) grel =
@@ -596,12 +594,7 @@ lemma wf_recur
 proof.
 move => wf_wfr.
 rewrite /wf_recur /grel_to_fun.
-apply
-  (choiceb_grel_fun (wfc_least wfr def wfrd) x
-   (wfrd x
-    (fun (y : 'a) =>
-       if predecs wfr x y then choiceb (wfc_least wfr def wfrd y) def else def))
-   def).
+apply (choiceb_grel_fun (wfc_least wfr def wfrd) x).
 apply wfc_least_is_fun.
 have least_result := wfc_least_result wfr def wfrd x _.
   trivial.
