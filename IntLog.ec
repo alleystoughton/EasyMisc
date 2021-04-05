@@ -40,6 +40,28 @@ have H :
 by rewrite H (lez_trans 1).
 qed.
 
+lemma int_log_uniq (b n k1 k2 : int) :
+  2 <= b =>
+  0 <= k1 => b ^ k1 <= n => n < b ^ (k1 + 1) =>
+  0 <= k2 => b ^ k2 <= n => n < b ^ (k2 + 1) =>
+  k1 = k2.
+proof.
+move => ge2_b ge0_k1 b2k1_le_n n_lt_b2k1p1 ge0_k2 b2k2_le_n n_lt_b2k2p1.
+have ge1_b : 1 <= b.
+  by rewrite (lez_trans 2).
+case (k1 = k2) => [// | /ltr_total [lt_k1_k2 | lt_k2_k1]].
+rewrite ltzE in lt_k1_k2.
+have b2k1p1_le_b2k2 : b ^ (k1 + 1) <= b ^ k2.
+  by rewrite ler_weexpn2l // lt_k1_k2 /= addr_ge0.
+have // : n < n.
+  by rewrite (ltr_le_trans (b ^ (k1 + 1))) // (lez_trans (b ^ k2)).
+rewrite ltzE in lt_k2_k1.
+have b2k2p1_le_b2k1 : b ^ (k2 + 1) <= b ^ k1.
+  by rewrite ler_weexpn2l // lt_k2_k1 /= addr_ge0.
+have // : n < n.
+  by rewrite (ltr_le_trans (b ^ (k2 + 1))) // (lez_trans (b ^ k1)).
+qed.
+
 (* integer logarithm *)
 
 op int_log (b n : int) : int =
@@ -47,11 +69,23 @@ op int_log (b n : int) : int =
   (fun (k : int) => 0 <= k /\ b ^ k <= n < b ^ (k + 1))
   0.
 
-lemma int_log (b n : int) :
+lemma int_logP (b n : int) :
   2 <= b => 1 <= n =>
   0 <= int_log b n /\ b ^ (int_log b n) <= n < b ^ (int_log b n + 1).
 proof.
 move => ge2_b ge1_n.
 have // := choicebP (fun k => 0 <= k /\ b ^ k <= n < b ^ (k + 1)) 0 _.
   by rewrite /= exists_int_log.
+qed.
+
+lemma int_logPuniq (b n l : int) :
+  2 <= b =>
+  0 <= l => b ^ l <= n < b ^ (l + 1) =>
+  l = int_log b n.
+proof.
+move => ge2_b ge0_n [b2l_le_n n_lt_b2lp1].
+have ge1_n : 1 <= n.
+  by rewrite (lez_trans (b ^ l)) // exprn_ege1 // (lez_trans 2).
+have := int_logP b n _ _ => // [#] ge0_il b2il_le_n n_lt_b2ilp1.
+by apply (int_log_uniq b n).
 qed.
