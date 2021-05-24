@@ -259,7 +259,7 @@ qed.
 lemma int_log_upPuniq (b n l : int) :
   2 <= b => 2 <= n =>
   1 <= l => b ^ (l - 1) < n <= b ^ l =>
-  l = int_log_up b n.  
+  l = int_log_up b n.
 proof.
 move => ge2_b ge2_n ge1_l [ge1_b2l_min1 le_n_b2l].
 have [[_ eq1_n] |] := int_log_upP b n _ _ => //.
