@@ -5,7 +5,11 @@ prover quorum=2 ["Alt-Ergo" "Z3"].  (* both provers must succeed *)
 require import AllCore List IntDiv StdOrder.
 import IntOrder.
 
-require import WF.  (* well-founded relations, induction and recursion *)
+(* well-founded relations, induction and recursion
+
+   now in EasyCrypt library: structures/WF.ec *)
+
+require import WF.
 
 (* define well-founded relation on lists: lt_list_size xs ys <=>
    size xs < size ys *)
