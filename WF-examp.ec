@@ -57,7 +57,8 @@ move : xs.
 apply (wf_ind lt_list_size).
 apply wf_lt_list_size.
 rewrite /chunkify => /= xs IH.
-rewrite wf_recur 1:wf_lt_list_size /chunkify_wf_rec_def.
+rewrite wf_recur 1:wf_lt_list_size.
+rewrite {1}/chunkify_wf_rec_def.  (* only need to rewrite at top-level *)
 case (n <= size xs) => [le_n_size_xs | not_le_n_size_xs].
 (* first case *)
 rewrite lt_list_sizeP.
