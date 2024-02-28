@@ -1,13 +1,8 @@
-(* example of well-founded recursion and induction *)
-
-prover quorum=2 ["Alt-Ergo" "Z3"].  (* both provers must succeed *)
+(* example use of well-founded recursion and induction
+   (theories/structures/WF.ec) *)
 
 require import AllCore List IntDiv StdOrder.
 import IntOrder.
-
-(* well-founded relations, induction and recursion
-
-   now in EasyCrypt library: structures/WF.ec *)
 
 require import WF.
 
@@ -52,9 +47,8 @@ op chunkify (n : int) : 'a list -> 'a list list =
 lemma chunkify_size (n : int, xs : 'a list) :
   1 <= n => size (chunkify n xs) = size xs %/ n.
 proof.
-move => ge1_n.
-move : xs.
-apply (wf_ind lt_list_size).
+move => ge1_n; move : xs.
+apply (wf_ind lt_list_size).  (* use well-founded induction on lt_list_size *)
 apply wf_lt_list_size.
 rewrite /chunkify => /= xs IH.
 rewrite wf_recur 1:wf_lt_list_size.
@@ -62,17 +56,11 @@ rewrite {1}/chunkify_wf_rec_def.  (* only need to rewrite at top-level *)
 case (n <= size xs) => [le_n_size_xs | not_le_n_size_xs].
 (* first case *)
 rewrite lt_list_sizeP.
-have lt_size_drop : size (drop n xs) < size xs.
-  rewrite size_drop /#.
+have lt_size_drop : size (drop n xs) < size xs by rewrite size_drop /#.
 rewrite lt_size_drop /= IH 1:lt_list_sizeP //.
 rewrite size_drop 1:/# ler_maxr 1:/#.
 have {2}-> : size xs = n + (size xs - n) by smt().
-  rewrite (divzDl n) /#.
+rewrite (divzDl n) 1:dvdzz divzz /#.
 (* second case *)
-rewrite -ltrNge in not_le_n_size_xs.
-rewrite divz_small //.
-split => [| _].
-rewrite size_ge0.
-rewrite ltr_normr.
-by left.
+smt(size_ge0 ltr_normr).
 qed.
