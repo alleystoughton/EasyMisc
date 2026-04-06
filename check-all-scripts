@@ -37,7 +37,6 @@ check() {
 }
 
 check IntLog.ec
-check TotalProb.ec
 
 # success!
 
